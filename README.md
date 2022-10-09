@@ -34,7 +34,7 @@ func main() {
 
 	// Create order
 	// You can send a PDF file via local filesystem path or a URL.
-	// Must be one or the other, not both.
+	// FilePath will take precedence over URL.
 	order, err := client.CreateOrder(mailform.OrderInput{
 		// Send local pdf
 		FilePath: "./sample.pdf",
