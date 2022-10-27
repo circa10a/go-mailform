@@ -2,6 +2,7 @@ package mailform
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -242,6 +243,18 @@ func (c *Client) CreateOrder(o OrderInput) (*Order, error) {
 		return order, err
 	}
 
+	if resp.StatusCode() == http.StatusUnauthorized {
+		return order, &ErrMailform{
+			Err: struct {
+				Code    string `json:"code"`
+				Message string `json:"message"`
+			}{
+				Code:    strconv.Itoa(http.StatusUnauthorized),
+				Message: "unauthorized",
+			},
+		}
+	}
+
 	if resp.IsError() {
 		return order, mailformErr
 	}
@@ -264,6 +277,18 @@ func (c *Client) GetOrder(o string) (*Order, error) {
 	resp, err := c.restClient.R().SetResult(order).SetError(mailformErr).Get(getOrderEndpoint)
 	if err != nil {
 		return order, err
+	}
+
+	if resp.StatusCode() == http.StatusUnauthorized {
+		return order, &ErrMailform{
+			Err: struct {
+				Code    string `json:"code"`
+				Message string `json:"message"`
+			}{
+				Code:    strconv.Itoa(http.StatusUnauthorized),
+				Message: "unauthorized",
+			},
+		}
 	}
 
 	if resp.IsError() {
