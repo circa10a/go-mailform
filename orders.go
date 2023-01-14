@@ -93,7 +93,7 @@ type OrderInput struct {
 	// The identifier of the bank account for the check associated with this order. Required if a check is to be included in this order.
 	BankAccount string
 	// The amount of the check associated with this order, in cents. Required if a check is to be included in this order.
-	Amount float64
+	Amount int
 	// The name of the recipient of the check associated with this order. Required if a check is to be included in this order.
 	CheckName string
 	// The number of the check associated with this order. Required if a check is to be included in this order.
@@ -143,8 +143,8 @@ func (o *OrderInput) FormData() map[string]string {
 	if o.BankAccount != "" {
 		formData["bank_account"] = o.BankAccount
 	}
-	if o.Amount != 0.00 {
-		formData["amount"] = fmt.Sprintf("%.2f", o.Amount)
+	if o.Amount != 0 {
+		formData["amount"] = strconv.Itoa(o.Amount)
 	}
 	if o.CheckName != "" {
 		formData["check_name"] = o.CheckName
