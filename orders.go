@@ -257,8 +257,11 @@ func (c *Client) CreateOrder(o OrderInput) (*Order, error) {
 
 	if resp.IsError() {
 		// This API is trash and tf provider needs some kind of diag summary
+		if mailformErr.Err.Code == "" {
+			mailformErr.Err.Code = strconv.Itoa(resp.StatusCode())
+		}
 		if mailformErr.Err.Message == "" {
-			mailformErr.Err.Message = fmt.Sprintf("no proper error response. Status code was: %d. Response body: %s", resp.StatusCode(), resp.String())
+			mailformErr.Err.Message = resp.String()
 		}
 		return order, mailformErr
 	}
