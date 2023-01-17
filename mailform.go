@@ -12,6 +12,11 @@ const (
 	// DefaultBaseURL is the default mailform API base url, but is can be overwritten via Config
 	DefaultBaseURL = "https://www.mailform.io/app/api/v1"
 	DefaultTimeout = time.Second * 15
+	// Order Statuses
+	StatusCancelled           = "cancelled"
+	StatusQueued              = "queued"
+	StatusAwaitingFulfillment = "awaiting_fulfillment"
+	StatusFulfilled           = "fulfilled"
 )
 
 var (
