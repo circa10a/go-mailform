@@ -331,6 +331,19 @@ func (o *OrderInput) Validate() error {
 		}
 	}
 
+	// Validate FilePath or URL
+	if o.FilePath != "" && o.URL != "" {
+		return &ErrOrderInvalid{
+			message: "FilePath and URL cannot both be provided; only one may be specified",
+		}
+	}
+
+	if o.ToName == "" {
+		return &ErrOrderInvalid{
+			message: fmt.Sprintf(genericRejectionStr, "ToName"),
+		}
+	}
+
 	// Validate ToName
 	if o.ToName == "" {
 		return &ErrOrderInvalid{

@@ -370,6 +370,16 @@ func TestValidate(t *testing.T) {
 		expectedErrStr string
 	}{
 		{
+			name: "EnsureOnlyOneOfFileOrURLIsProvidedError",
+			input: &OrderInput{
+				FilePath: "./somefile.pdf",
+				URL:      "http://someurl.com/somefile.pdf",
+				Service:  "USPS_STANDARD",
+			},
+			expectErr:      true,
+			expectedErrStr: "FilePath and URL cannot both be provided; only one may be specified",
+		},
+		{
 			name: "EnsureServiceCodeErrorIsReturned",
 			input: &OrderInput{
 				Service: "Unsupported",
