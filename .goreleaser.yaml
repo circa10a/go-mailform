@@ -1,8 +1,8 @@
-before:
-  hooks:
-    - go mod tidy
+version: 2
+
 builds:
   - skip: true
+
 changelog:
-  skip: false
+  disable: false
   sort: asc
