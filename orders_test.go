@@ -116,6 +116,7 @@ func TestCreateOrderError(t *testing.T) {
 	// check that addresses is nearby
 	_, err = mailformClient.CreateOrder(OrderInput{
 		Service:      "USPS_STANDARD",
+		URL:          "http://example.com/doc.pdf",
 		ToName:       "some_name",
 		ToAddress1:   "some_address1",
 		ToCity:       "some_city",
@@ -218,6 +219,7 @@ func TestCreateOrder(t *testing.T) {
 	// check that addresses is nearby
 	order, err := mailformClient.CreateOrder(OrderInput{
 		Service:      "USPS_STANDARD",
+		URL:          "http://example.com/doc.pdf",
 		ToName:       "some_name",
 		ToAddress1:   "some_address1",
 		ToCity:       "some_city",
@@ -370,6 +372,16 @@ func TestValidate(t *testing.T) {
 		expectedErrStr string
 	}{
 		{
+			name: "EnsureOnlyOneOfFileOrURLIsProvidedError",
+			input: &OrderInput{
+				FilePath: "./somefile.pdf",
+				URL:      "http://someurl.com/somefile.pdf",
+				Service:  "USPS_STANDARD",
+			},
+			expectErr:      true,
+			expectedErrStr: "FilePath and URL cannot both be provided; only one may be specified",
+		},
+		{
 			name: "EnsureServiceCodeErrorIsReturned",
 			input: &OrderInput{
 				Service: "Unsupported",
@@ -381,6 +393,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureToNameErrorIsReturned",
 			input: &OrderInput{
 				Service: "USPS_STANDARD",
+				URL:     "http://example.com/doc.pdf",
 			},
 			expectErr:      true,
 			expectedErrStr: "ToName not provided",
@@ -389,6 +402,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureToAddress1ErrorIsReturned",
 			input: &OrderInput{
 				Service: "USPS_STANDARD",
+				URL:     "http://example.com/doc.pdf",
 				ToName:  "some_name",
 			},
 			expectErr:      true,
@@ -398,6 +412,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureToCityErrorIsReturned",
 			input: &OrderInput{
 				Service:    "USPS_STANDARD",
+				URL:        "http://example.com/doc.pdf",
 				ToName:     "some_name",
 				ToAddress1: "some_address1",
 			},
@@ -408,6 +423,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureToStateErrorIsReturned",
 			input: &OrderInput{
 				Service:    "USPS_STANDARD",
+				URL:        "http://example.com/doc.pdf",
 				ToName:     "some_name",
 				ToAddress1: "some_address1",
 				ToCity:     "some_city",
@@ -419,6 +435,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureToPostcodeErrorIsReturned",
 			input: &OrderInput{
 				Service:    "USPS_STANDARD",
+				URL:        "http://example.com/doc.pdf",
 				ToName:     "some_name",
 				ToAddress1: "some_address1",
 				ToCity:     "some_city",
@@ -431,6 +448,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureToCountryErrorIsReturned",
 			input: &OrderInput{
 				Service:    "USPS_STANDARD",
+				URL:        "http://example.com/doc.pdf",
 				ToName:     "some_name",
 				ToAddress1: "some_address1",
 				ToCity:     "some_city",
@@ -444,6 +462,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureFromNameErrorIsReturned",
 			input: &OrderInput{
 				Service:    "USPS_STANDARD",
+				URL:        "http://example.com/doc.pdf",
 				ToName:     "some_name",
 				ToAddress1: "some_address1",
 				ToCity:     "some_city",
@@ -458,6 +477,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureFromAddress1ErrorIsReturned",
 			input: &OrderInput{
 				Service:    "USPS_STANDARD",
+				URL:        "http://example.com/doc.pdf",
 				ToName:     "some_name",
 				ToAddress1: "some_address1",
 				ToCity:     "some_city",
@@ -473,6 +493,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureFromCityErrorIsReturned",
 			input: &OrderInput{
 				Service:      "USPS_STANDARD",
+				URL:          "http://example.com/doc.pdf",
 				ToName:       "some_name",
 				ToAddress1:   "some_address1",
 				ToCity:       "some_city",
@@ -489,6 +510,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureFromStateErrorIsReturned",
 			input: &OrderInput{
 				Service:      "USPS_STANDARD",
+				URL:          "http://example.com/doc.pdf",
 				ToName:       "some_name",
 				ToAddress1:   "some_address1",
 				ToCity:       "some_city",
@@ -506,6 +528,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureFromPostcodeErrorIsReturned",
 			input: &OrderInput{
 				Service:      "USPS_STANDARD",
+				URL:          "http://example.com/doc.pdf",
 				ToName:       "some_name",
 				ToAddress1:   "some_address1",
 				ToCity:       "some_city",
@@ -524,6 +547,7 @@ func TestValidate(t *testing.T) {
 			name: "EnsureFromCountryErrorIsReturned",
 			input: &OrderInput{
 				Service:      "USPS_STANDARD",
+				URL:          "http://example.com/doc.pdf",
 				ToName:       "some_name",
 				ToAddress1:   "some_address1",
 				ToCity:       "some_city",
@@ -538,6 +562,68 @@ func TestValidate(t *testing.T) {
 			},
 			expectErr:      true,
 			expectedErrStr: "FromCountry not provided",
+		},
+		{
+			name: "EnsureNeitherFileNorURLErrors",
+			input: &OrderInput{
+				Service:      "USPS_STANDARD",
+				ToName:       "some_name",
+				ToAddress1:   "some_address1",
+				ToCity:       "some_city",
+				ToState:      "some_state",
+				ToPostcode:   "some_postcode",
+				ToCountry:    "some_country",
+				FromName:     "some_fromname",
+				FromAddress1: "some_fromaddress1",
+				FromCity:     "some_fromcity",
+				FromState:    "some_fromstate",
+				FromPostcode: "some_frompostcode",
+				FromCountry:  "some_fromcountry",
+			},
+			expectErr:      true,
+			expectedErrStr: "either FilePath or URL must be provided",
+		},
+		{
+			name: "EnsureOnlyFilePathIsAccepted",
+			input: &OrderInput{
+				FilePath:     "./somefile.pdf",
+				Service:      "USPS_STANDARD",
+				ToName:       "some_name",
+				ToAddress1:   "some_address1",
+				ToCity:       "some_city",
+				ToState:      "some_state",
+				ToPostcode:   "some_postcode",
+				ToCountry:    "some_country",
+				FromName:     "some_fromname",
+				FromAddress1: "some_fromaddress1",
+				FromCity:     "some_fromcity",
+				FromState:    "some_fromstate",
+				FromPostcode: "some_frompostcode",
+				FromCountry:  "some_fromcountry",
+			},
+			expectErr:      false,
+			expectedErrStr: "",
+		},
+		{
+			name: "EnsureOnlyURLIsAccepted",
+			input: &OrderInput{
+				URL:          "http://example.com/somefile.pdf",
+				Service:      "USPS_STANDARD",
+				ToName:       "some_name",
+				ToAddress1:   "some_address1",
+				ToCity:       "some_city",
+				ToState:      "some_state",
+				ToPostcode:   "some_postcode",
+				ToCountry:    "some_country",
+				FromName:     "some_fromname",
+				FromAddress1: "some_fromaddress1",
+				FromCity:     "some_fromcity",
+				FromState:    "some_fromstate",
+				FromPostcode: "some_frompostcode",
+				FromCountry:  "some_fromcountry",
+			},
+			expectErr:      false,
+			expectedErrStr: "",
 		},
 	}
 
