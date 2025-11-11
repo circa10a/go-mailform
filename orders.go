@@ -311,6 +311,47 @@ func (c *Client) GetOrder(o string) (*Order, error) {
 	return order, nil
 }
 
+func (c *Client) CancelOrder(o string) error {
+	cancelEndpoint := fmt.Sprintf("%s/cancel/%s", ordersEndpoint, o)
+
+	// Use a lightweight struct for just the success field
+	var respBody struct {
+		Success bool `json:"success"`
+	}
+	mailformErr := &ErrMailform{}
+
+	resp, err := c.restClient.R().
+		SetResult(&respBody).
+		SetError(mailformErr).
+		Get(cancelEndpoint)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode() == http.StatusUnauthorized {
+		return &ErrMailform{
+			Err: struct {
+				Code    string `json:"code"`
+				Message string `json:"message"`
+			}{
+				Code:    strconv.Itoa(http.StatusUnauthorized),
+				Message: "unauthorized",
+			},
+		}
+	}
+
+	if resp.IsError() {
+		return mailformErr
+	}
+
+	// Check the success field explicitly
+	if !respBody.Success {
+		return fmt.Errorf("order %s could not be cancelled", o)
+	}
+
+	return nil
+}
+
 // ErrOrderInvalid is returned when order input is invalid
 type ErrOrderInvalid struct {
 	message string

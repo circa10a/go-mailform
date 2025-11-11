@@ -364,6 +364,53 @@ func TestGetOrder(t *testing.T) {
 	assert.Equal(t, info[fmt.Sprintf("%s %s", http.MethodGet, fakeEndpoint)], 1)
 }
 
+func TestCancelOrder(t *testing.T) {
+	fakeOrderID := "order123"
+	fakeEndpoint := fmt.Sprintf("%s%s/cancel/%s", DefaultBaseURL, ordersEndpoint, fakeOrderID)
+
+	client, err := New(&Config{})
+	assert.NoError(t, err)
+
+	httpmock.ActivateNonDefault(client.restClient.GetClient())
+	defer httpmock.DeactivateAndReset()
+
+	// Mock successful cancellation response
+	httpmock.RegisterResponder(http.MethodGet, fakeEndpoint,
+		func(req *http.Request) (*http.Response, error) {
+			return httpmock.NewJsonResponse(200, map[string]bool{"success": true})
+		})
+
+	// Call CancelOrder
+	err = client.CancelOrder(fakeOrderID)
+	assert.NoError(t, err)
+
+	// Check that the API endpoint was called exactly once
+	info := httpmock.GetCallCountInfo()
+	assert.Equal(t, 1, info[fmt.Sprintf("%s %s", http.MethodGet, fakeEndpoint)])
+}
+
+func TestCancelOrderFailure(t *testing.T) {
+	fakeOrderID := "order123"
+	fakeEndpoint := fmt.Sprintf("%s%s/cancel/%s", DefaultBaseURL, ordersEndpoint, fakeOrderID)
+
+	client, err := New(&Config{})
+	assert.NoError(t, err)
+
+	httpmock.ActivateNonDefault(client.restClient.GetClient())
+	defer httpmock.DeactivateAndReset()
+
+	// Mock unsuccessful cancellation response
+	httpmock.RegisterResponder(http.MethodGet, fakeEndpoint,
+		func(req *http.Request) (*http.Response, error) {
+			return httpmock.NewJsonResponse(200, map[string]bool{"success": false})
+		})
+
+	// Call CancelOrder
+	err = client.CancelOrder(fakeOrderID)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "could not be cancelled")
+}
+
 func TestValidate(t *testing.T) {
 	tests := []struct {
 		name           string
