@@ -28,8 +28,8 @@ var (
 
 // Client is the mailform REST API client.
 type Client struct {
-	restClient         *resty.Client
-	cancellationClient *resty.Client
+	apiClient *resty.Client
+	appClient *resty.Client
 }
 
 // Config is the configuration used to communicate with the mailform API.
@@ -85,11 +85,11 @@ func New(c *Config) (*Client, error) {
 
 	// Create new client(s) for mailform.io
 	mailformClient := &Client{
-		restClient: resty.New().
+		apiClient: resty.New().
 			SetBaseURL(apiBaseURL).
 			SetTimeout(timeout).
 			SetAuthToken(c.Token),
-		cancellationClient: resty.New().
+		appClient: resty.New().
 			SetBaseURL(appBaseURL).
 			SetTimeout(timeout).
 			SetAuthToken(c.Token),
