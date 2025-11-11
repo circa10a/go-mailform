@@ -101,7 +101,7 @@ func TestCreateOrderError(t *testing.T) {
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(mailformClient.restClient.GetClient())
+	httpmock.ActivateNonDefault(mailformClient.apiClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// mock json rsponse
@@ -148,7 +148,7 @@ func TestCreateOrder(t *testing.T) {
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(mailformClient.restClient.GetClient())
+	httpmock.ActivateNonDefault(mailformClient.apiClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// mock json response
@@ -250,7 +250,7 @@ func TestGetOrderError(t *testing.T) {
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(mailformClient.restClient.GetClient())
+	httpmock.ActivateNonDefault(mailformClient.apiClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// mock json rsponse
@@ -283,7 +283,7 @@ func TestGetOrder(t *testing.T) {
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(mailformClient.restClient.GetClient())
+	httpmock.ActivateNonDefault(mailformClient.apiClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// mock json response
@@ -371,7 +371,7 @@ func TestCancelOrder(t *testing.T) {
 	client, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(client.cancellationClient.GetClient())
+	httpmock.ActivateNonDefault(client.appClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// Mock successful cancellation response
@@ -396,7 +396,7 @@ func TestCancelOrderFailure(t *testing.T) {
 	client, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(client.cancellationClient.GetClient())
+	httpmock.ActivateNonDefault(client.appClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// Mock unsuccessful cancellation response

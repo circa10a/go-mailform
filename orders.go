@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	// Cancel
-	orderEndpoint = "/order"
-	// Create/Get
+	// Api Client, Create/Get
 	ordersEndpoint = "/orders"
+	// App Client, for Cancel
+	orderEndpoint = "/order"
 )
 
 var (
@@ -229,7 +229,7 @@ func (c *Client) CreateOrder(o OrderInput) (*Order, error) {
 	// Convert order input to form data
 	formData := o.FormData()
 
-	req := c.restClient.R()
+	req := c.apiClient.R()
 	// If path is provided, set file form data and read local file
 	if o.FilePath != "" {
 		req.SetFile("file", o.FilePath)
@@ -284,7 +284,11 @@ func (c *Client) GetOrder(o string) (*Order, error) {
 	order := &Order{}
 	mailformErr := &ErrMailform{}
 
-	resp, err := c.restClient.R().SetResult(order).SetError(mailformErr).Get(getOrderEndpoint)
+	resp, err := c.apiClient.R().
+		SetResult(order).
+		SetError(mailformErr).
+		Get(getOrderEndpoint)
+
 	if err != nil {
 		return order, err
 	}
@@ -314,6 +318,7 @@ func (c *Client) GetOrder(o string) (*Order, error) {
 	return order, nil
 }
 
+// CancelOrder cancels a mailform order.
 func (c *Client) CancelOrder(o string) error {
 	cancelEndpoint := fmt.Sprintf("%s/cancel/%s", orderEndpoint, o)
 
@@ -321,9 +326,10 @@ func (c *Client) CancelOrder(o string) error {
 	var respBody struct {
 		Success bool `json:"success"`
 	}
+
 	mailformErr := &ErrMailform{}
 
-	resp, err := c.cancellationClient.R().
+	resp, err := c.appClient.R().
 		SetResult(&respBody).
 		SetError(mailformErr).
 		Post(cancelEndpoint)

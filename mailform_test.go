@@ -57,14 +57,14 @@ func TestNew(t *testing.T) {
 				return
 			}
 			// Ensure token is passed correctly
-			assert.Equal(t, test.expectedAPIBaseURL, actual.restClient.BaseURL)
+			assert.Equal(t, test.expectedAPIBaseURL, actual.apiClient.BaseURL)
 			// Ensure baseURL is passed correctly
-			assert.Equal(t, test.expectedToken, actual.restClient.Token)
+			assert.Equal(t, test.expectedToken, actual.apiClient.Token)
 
 			// Ensure token is passed correctly
-			assert.Equal(t, test.expectedAppBaseURL, actual.cancellationClient.BaseURL)
+			assert.Equal(t, test.expectedAppBaseURL, actual.appClient.BaseURL)
 			// Ensure baseURL is passed correctly
-			assert.Equal(t, test.expectedToken, actual.cancellationClient.Token)
+			assert.Equal(t, test.expectedToken, actual.appClient.Token)
 
 			// Ensure no unexpected error
 			assert.NoError(t, err)
