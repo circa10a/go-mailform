@@ -97,7 +97,7 @@ func TestFormData(t *testing.T) {
 }
 
 func TestCreateOrderError(t *testing.T) {
-	fakeEndpoint := fmt.Sprintf("%s%s", DefaultBaseURL, ordersEndpoint)
+	fakeEndpoint := fmt.Sprintf("%s%s", DefaultAPIBaseURL, ordersEndpoint)
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
 
@@ -143,7 +143,7 @@ func TestCreateOrderError(t *testing.T) {
 }
 
 func TestCreateOrder(t *testing.T) {
-	fakeEndpoint := fmt.Sprintf("%s%s", DefaultBaseURL, ordersEndpoint)
+	fakeEndpoint := fmt.Sprintf("%s%s", DefaultAPIBaseURL, ordersEndpoint)
 	fakeOrderID := "someID"
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
@@ -246,7 +246,7 @@ func TestCreateOrder(t *testing.T) {
 
 func TestGetOrderError(t *testing.T) {
 	fakeOrderID := "someID"
-	fakeEndpoint := fmt.Sprintf("%s%s/%s", DefaultBaseURL, ordersEndpoint, fakeOrderID)
+	fakeEndpoint := fmt.Sprintf("%s%s/%s", DefaultAPIBaseURL, ordersEndpoint, fakeOrderID)
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
 
@@ -278,7 +278,7 @@ func TestGetOrderError(t *testing.T) {
 
 func TestGetOrder(t *testing.T) {
 	fakeOrderID := "someID"
-	fakeEndpoint := fmt.Sprintf("%s%s/%s", DefaultBaseURL, ordersEndpoint, fakeOrderID)
+	fakeEndpoint := fmt.Sprintf("%s%s/%s", DefaultAPIBaseURL, ordersEndpoint, fakeOrderID)
 
 	mailformClient, err := New(&Config{})
 	assert.NoError(t, err)
@@ -366,16 +366,16 @@ func TestGetOrder(t *testing.T) {
 
 func TestCancelOrder(t *testing.T) {
 	fakeOrderID := "order123"
-	fakeEndpoint := fmt.Sprintf("%s%s/cancel/%s", DefaultBaseURL, ordersEndpoint, fakeOrderID)
+	fakeEndpoint := fmt.Sprintf("%s%s/cancel/%s", DefaultAppBaseURL, orderEndpoint, fakeOrderID)
 
 	client, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(client.restClient.GetClient())
+	httpmock.ActivateNonDefault(client.cancellationClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// Mock successful cancellation response
-	httpmock.RegisterResponder(http.MethodGet, fakeEndpoint,
+	httpmock.RegisterResponder(http.MethodPost, fakeEndpoint,
 		func(req *http.Request) (*http.Response, error) {
 			return httpmock.NewJsonResponse(200, map[string]bool{"success": true})
 		})
@@ -386,21 +386,21 @@ func TestCancelOrder(t *testing.T) {
 
 	// Check that the API endpoint was called exactly once
 	info := httpmock.GetCallCountInfo()
-	assert.Equal(t, 1, info[fmt.Sprintf("%s %s", http.MethodGet, fakeEndpoint)])
+	assert.Equal(t, 1, info[fmt.Sprintf("%s %s", http.MethodPost, fakeEndpoint)])
 }
 
 func TestCancelOrderFailure(t *testing.T) {
 	fakeOrderID := "order123"
-	fakeEndpoint := fmt.Sprintf("%s%s/cancel/%s", DefaultBaseURL, ordersEndpoint, fakeOrderID)
+	fakeEndpoint := fmt.Sprintf("%s%s/cancel/%s", DefaultAppBaseURL, orderEndpoint, fakeOrderID)
 
 	client, err := New(&Config{})
 	assert.NoError(t, err)
 
-	httpmock.ActivateNonDefault(client.restClient.GetClient())
+	httpmock.ActivateNonDefault(client.cancellationClient.GetClient())
 	defer httpmock.DeactivateAndReset()
 
 	// Mock unsuccessful cancellation response
-	httpmock.RegisterResponder(http.MethodGet, fakeEndpoint,
+	httpmock.RegisterResponder(http.MethodPost, fakeEndpoint,
 		func(req *http.Request) (*http.Response, error) {
 			return httpmock.NewJsonResponse(200, map[string]bool{"success": false})
 		})

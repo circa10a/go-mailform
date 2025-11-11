@@ -9,12 +9,13 @@ import (
 
 func TestNew(t *testing.T) {
 	tests := []struct {
-		name            string
-		input           *Config
-		expectErr       bool
-		expectedErr     error
-		expectedBaseURL string
-		expectedToken   string
+		name               string
+		input              *Config
+		expectErr          bool
+		expectedErr        error
+		expectedAPIBaseURL string
+		expectedAppBaseURL string
+		expectedToken      string
 	}{
 		{
 			name:        "EnsureNilConfigErrReturned",
@@ -22,19 +23,29 @@ func TestNew(t *testing.T) {
 			expectedErr: ErrNilConfig,
 		},
 		{
-			name: "EnsureCustomBaseURLIsSet",
+			name: "EnsureCustomAPIBaseURLIsSet",
 			input: &Config{
-				BaseURL: "customBaseURL",
+				APIBaseURL: "customBaseURL",
 			},
-			expectedBaseURL: "customBaseURL",
+			expectedAPIBaseURL: "customBaseURL",
+			expectedAppBaseURL: DefaultAppBaseURL,
+		},
+		{
+			name: "EnsureCustomAppBaseURLIsSet",
+			input: &Config{
+				AppBaseURL: "customAppBaseURL",
+			},
+			expectedAPIBaseURL: DefaultAPIBaseURL,
+			expectedAppBaseURL: "customAppBaseURL",
 		},
 		{
 			name: "EnsureTokenURLIsSet",
 			input: &Config{
 				Token: "someToken",
 			},
-			expectedToken:   "someToken",
-			expectedBaseURL: DefaultBaseURL,
+			expectedToken:      "someToken",
+			expectedAPIBaseURL: DefaultAPIBaseURL,
+			expectedAppBaseURL: DefaultAppBaseURL,
 		},
 	}
 
@@ -46,9 +57,15 @@ func TestNew(t *testing.T) {
 				return
 			}
 			// Ensure token is passed correctly
-			assert.Equal(t, test.expectedBaseURL, actual.restClient.BaseURL)
+			assert.Equal(t, test.expectedAPIBaseURL, actual.restClient.BaseURL)
 			// Ensure baseURL is passed correctly
 			assert.Equal(t, test.expectedToken, actual.restClient.Token)
+
+			// Ensure token is passed correctly
+			assert.Equal(t, test.expectedAppBaseURL, actual.cancellationClient.BaseURL)
+			// Ensure baseURL is passed correctly
+			assert.Equal(t, test.expectedToken, actual.cancellationClient.Token)
+
 			// Ensure no unexpected error
 			assert.NoError(t, err)
 		})
