@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	// DefaultBaseURL is the default mailform API base url, but is can be overwritten via Config
-	DefaultBaseURL = "https://www.mailform.io/app/api/v1"
-	DefaultTimeout = time.Second * 15
+	// DefaultAPIBaseURL is the default mailform API base url, but is can be overwritten via Config
+	DefaultAPIBaseURL = "https://www.mailform.io/app/api/v1"
+	// DefaultAppBaseURL is used for other endpoints like cancel... for some reason
+	DefaultAppBaseURL = "https://www.mailform.io/app/v1"
+	DefaultTimeout    = time.Second * 15
 	// Order Statuses
 	StatusCancelled           = "cancelled"
 	StatusQueued              = "queued"
@@ -26,14 +28,16 @@ var (
 
 // Client is the mailform REST API client.
 type Client struct {
-	restClient *resty.Client
+	restClient         *resty.Client
+	cancellationClient *resty.Client
 }
 
 // Config is the configuration used to communicate with the mailform API.
 type Config struct {
-	Token   string
-	BaseURL string
-	Timeout time.Duration
+	Token      string
+	APIBaseURL string
+	AppBaseURL string
+	Timeout    time.Duration
 }
 
 // ErrMailform is the error returned when mailform responds with an error.
@@ -62,10 +66,15 @@ func New(c *Config) (*Client, error) {
 	}
 
 	// Check for API token
-	// Allow consumer to override default baseURL if needed
-	baseURL := DefaultBaseURL
-	if c.BaseURL != "" {
-		baseURL = c.BaseURL
+	// Allow consumer to override default baseURL(s) if needed
+	apiBaseURL := DefaultAPIBaseURL
+	if c.APIBaseURL != "" {
+		apiBaseURL = c.APIBaseURL
+	}
+
+	appBaseURL := DefaultAppBaseURL
+	if c.AppBaseURL != "" {
+		appBaseURL = c.AppBaseURL
 	}
 
 	// Allow consumer to override default timeout if needed
@@ -74,10 +83,14 @@ func New(c *Config) (*Client, error) {
 		timeout = c.Timeout
 	}
 
-	// Create new client for mailform.io
+	// Create new client(s) for mailform.io
 	mailformClient := &Client{
 		restClient: resty.New().
-			SetBaseURL(baseURL).
+			SetBaseURL(apiBaseURL).
+			SetTimeout(timeout).
+			SetAuthToken(c.Token),
+		cancellationClient: resty.New().
+			SetBaseURL(appBaseURL).
 			SetTimeout(timeout).
 			SetAuthToken(c.Token),
 	}

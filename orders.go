@@ -8,6 +8,9 @@ import (
 )
 
 const (
+	// Cancel
+	orderEndpoint = "/order"
+	// Create/Get
 	ordersEndpoint = "/orders"
 )
 
@@ -312,7 +315,7 @@ func (c *Client) GetOrder(o string) (*Order, error) {
 }
 
 func (c *Client) CancelOrder(o string) error {
-	cancelEndpoint := fmt.Sprintf("%s/cancel/%s", ordersEndpoint, o)
+	cancelEndpoint := fmt.Sprintf("%s/cancel/%s", orderEndpoint, o)
 
 	// Use a lightweight struct for just the success field
 	var respBody struct {
@@ -320,10 +323,11 @@ func (c *Client) CancelOrder(o string) error {
 	}
 	mailformErr := &ErrMailform{}
 
-	resp, err := c.restClient.R().
+	resp, err := c.cancellationClient.R().
 		SetResult(&respBody).
 		SetError(mailformErr).
-		Get(cancelEndpoint)
+		Post(cancelEndpoint)
+
 	if err != nil {
 		return err
 	}
