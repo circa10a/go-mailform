@@ -3,6 +3,7 @@ package mailform
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -35,9 +36,10 @@ type Client struct {
 // Config is the configuration used to communicate with the mailform API.
 type Config struct {
 	Token      string
-	APIBaseURL string
-	AppBaseURL string
+	APIBaseURL string // Most API operations
+	AppBaseURL string // Cancel, not documented in the public API docs
 	Timeout    time.Duration
+	HTTPClient *http.Client
 }
 
 // ErrMailform is the error returned when mailform responds with an error.
@@ -65,7 +67,12 @@ func New(c *Config) (*Client, error) {
 		return nil, ErrNilConfig
 	}
 
-	// Check for API token
+	// Allow custom http clients
+	httpClient := http.DefaultClient
+	if c.HTTPClient != nil {
+		httpClient = c.HTTPClient
+	}
+
 	// Allow consumer to override default baseURL(s) if needed
 	apiBaseURL := DefaultAPIBaseURL
 	if c.APIBaseURL != "" {
@@ -85,11 +92,11 @@ func New(c *Config) (*Client, error) {
 
 	// Create new client(s) for mailform.io
 	mailformClient := &Client{
-		apiClient: resty.New().
+		apiClient: resty.NewWithClient(httpClient).
 			SetBaseURL(apiBaseURL).
 			SetTimeout(timeout).
 			SetAuthToken(c.Token),
-		appClient: resty.New().
+		appClient: resty.NewWithClient(httpClient).
 			SetBaseURL(appBaseURL).
 			SetTimeout(timeout).
 			SetAuthToken(c.Token),
