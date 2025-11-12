@@ -2,12 +2,16 @@ package mailform
 
 import (
 	"encoding/json"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
+	customHTTPClient := &http.Client{Timeout: 99 * time.Second}
+
 	tests := []struct {
 		name               string
 		input              *Config
@@ -16,11 +20,13 @@ func TestNew(t *testing.T) {
 		expectedAPIBaseURL string
 		expectedAppBaseURL string
 		expectedToken      string
+		expectedHTTPClient *http.Client
 	}{
 		{
-			name:        "EnsureNilConfigErrReturned",
-			expectErr:   true,
-			expectedErr: ErrNilConfig,
+			name:               "EnsureNilConfigErrReturned",
+			expectErr:          true,
+			expectedErr:        ErrNilConfig,
+			expectedHTTPClient: http.DefaultClient,
 		},
 		{
 			name: "EnsureCustomAPIBaseURLIsSet",
@@ -29,6 +35,7 @@ func TestNew(t *testing.T) {
 			},
 			expectedAPIBaseURL: "customBaseURL",
 			expectedAppBaseURL: DefaultAppBaseURL,
+			expectedHTTPClient: http.DefaultClient,
 		},
 		{
 			name: "EnsureCustomAppBaseURLIsSet",
@@ -37,6 +44,7 @@ func TestNew(t *testing.T) {
 			},
 			expectedAPIBaseURL: DefaultAPIBaseURL,
 			expectedAppBaseURL: "customAppBaseURL",
+			expectedHTTPClient: http.DefaultClient,
 		},
 		{
 			name: "EnsureTokenURLIsSet",
@@ -46,6 +54,16 @@ func TestNew(t *testing.T) {
 			expectedToken:      "someToken",
 			expectedAPIBaseURL: DefaultAPIBaseURL,
 			expectedAppBaseURL: DefaultAppBaseURL,
+			expectedHTTPClient: http.DefaultClient,
+		},
+		{
+			name: "EnsureCustomHTTPClientIsUsed",
+			input: &Config{
+				HTTPClient: customHTTPClient,
+			},
+			expectedAPIBaseURL: DefaultAPIBaseURL,
+			expectedAppBaseURL: DefaultAppBaseURL,
+			expectedHTTPClient: customHTTPClient,
 		},
 	}
 
